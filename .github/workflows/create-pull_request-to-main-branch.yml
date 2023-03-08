@@ -19,8 +19,8 @@ jobs:
               title: "${{ github.event.pull_request.title }}",
               owner,
               repo,
-              head: 'main',
-              base: "${{ github.event.pull_request.head.ref }}",
+              head: "${{ github.event.pull_request.head.ref }}",
+              base: 'main',
               body: [
                 'This PR is auto-generated.',
               ].join('\n')
