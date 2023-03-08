@@ -23,6 +23,7 @@ jobs:
               base: 'main',
               body: [
                 'This PR is auto-generated.',
+                "by ${{ github.event.pull_request.url }}",
               ].join('\n')
             });
 
