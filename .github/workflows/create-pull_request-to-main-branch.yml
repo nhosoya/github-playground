@@ -16,11 +16,11 @@ jobs:
           script: |
             const { repo, owner } = context.repo;
             const result = await github.rest.pulls.create({
-              title: github.event.pull_request.title,
+              title: ${{ github.event.pull_request.title }},
               owner,
               repo,
               head: 'main',
-              base: github.event.pull_request.base.ref,
+              base: ${{ github.event.pull_request.base.ref }},
               body: [
                 'This PR is auto-generated.',
               ].join('\n')
