@@ -22,8 +22,7 @@ jobs:
               head: "${{ github.event.pull_request.head.ref }}",
               base: 'main',
               body: [
-                'This PR is auto-generated.',
-                "by ${{ github.event.pull_request.url }}",
+                "This PR is auto-generated from ${{ github.event.pull_request.html_url }}",
               ].join('\n')
             });
 
