@@ -1,0 +1,15 @@
+name: hello
+on:
+  push:
+    branches:
+      - main
+jobs:
+  greeting:
+    name: a job to say hello
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v3
+      - uses: nhosoya/actions-hello@v0.0.1
+      - run: echo random-number ${{ steps.foo.outputs.random-number }}
+        shell: bash
