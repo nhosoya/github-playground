@@ -15,6 +15,7 @@
   const recorded = new Set();
   let jaVoice = null;
   let japaneseVoices=[];
+  let lastSpokenKey='',lastSpokenAt=0;
 
   function refreshVoice(){
     const voices = speechSynthesis.getVoices();
@@ -35,13 +36,20 @@
   refreshRecorded();
   document.addEventListener('visibilitychange',()=>{if(!document.hidden){refreshRecorded();refreshVoice()}});
 
-  function speak(text){try{refreshVoice();speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='ja-JP';if(jaVoice)u.voice=jaVoice;u.rate=.88;u.pitch=1.0;u.volume=1;speechSynthesis.speak(u)}catch(e){}}
-
-  document.addEventListener('pointerup',e=>{
-    const toy=e.target.closest?.('.toy');if(!toy)return;
+  function speak(text,key){
+    const now=performance.now();
+    if(key===lastSpokenKey&&now-lastSpokenAt<450)return;
+    lastSpokenKey=key;lastSpokenAt=now;
+    try{refreshVoice();speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='ja-JP';if(jaVoice)u.voice=jaVoice;u.rate=.88;u.pitch=1.0;u.volume=1;speechSynthesis.speak(u)}catch(e){}
+  }
+  function speakToy(toy){
+    if(!toy)return;
     let text=toy.dataset.speak||'',key=toy.dataset.voiceKey||'';
     if(!text||!key){const pair=emojiToWord.get(toy.textContent.trim());if(!pair)return;[text,key]=pair}
     if(recorded.has(key))return;
-    speak(text);
-  },{capture:true,passive:true});
+    speak(text,key);
+  }
+
+  document.addEventListener('pointerup',e=>speakToy(e.target.closest?.('.toy')),{capture:true,passive:true});
+  document.addEventListener('kotoba-speak-toy',e=>speakToy(e.target.closest?.('.toy')),{capture:true});
 })();
