@@ -73,10 +73,10 @@
 
   const style=document.createElement('style');
   style.textContent=`
-    #muteStart,#muteGame{border:0;border-radius:999px;font:inherit;font-weight:900;color:#344;background:rgba(255,255,255,.92);box-shadow:0 4px 12px rgba(0,0,0,.12);touch-action:manipulation}
-    #muteStart{position:absolute;left:50%;bottom:max(14vh,calc(env(safe-area-inset-bottom) + 92px));transform:translateX(-50%);padding:11px 17px;z-index:55;white-space:nowrap}
-    #muteGame{position:absolute;left:12px;bottom:max(18px,calc(env(safe-area-inset-bottom) + 8px));z-index:31;padding:11px 15px;min-width:112px}
-    #muteGame.armed{background:#fff0b8;transform:scale(1.05)}
+    #muteStart,#muteGame{border:0;font:inherit;font-weight:900;color:#344;background:rgba(255,255,255,.92);box-shadow:0 4px 12px rgba(0,0,0,.12);touch-action:manipulation}
+    #muteStart{position:absolute;left:50%;bottom:max(14vh,calc(env(safe-area-inset-bottom) + 92px));transform:translateX(-50%);padding:11px 17px;z-index:55;white-space:nowrap;border-radius:999px}
+    #muteGame{position:absolute;left:14px;bottom:max(16px,calc(env(safe-area-inset-bottom) + 7px));z-index:31;width:50px;height:50px;padding:0;border-radius:50%;display:grid;place-items:center;font-size:23px;line-height:1}
+    #muteGame.armed{background:#fff0b8;transform:scale(1.08);font-size:17px;width:92px;border-radius:999px;padding:0 10px}
     body.night-mode #muteGame{background:rgba(248,248,255,.94);color:#20284d;box-shadow:0 4px 14px rgba(0,0,0,.3)}
   `;
   document.head.appendChild(style);
@@ -106,9 +106,10 @@
   }
 
   function updateUI(){
-    const text=muted?'🔇 ミュート':'🔊 おとあり';
-    if(startButton){startButton.textContent=text;startButton.setAttribute('aria-pressed',muted?'true':'false')}
-    if(gameButton&&!gameButton.classList.contains('armed')){gameButton.textContent=text;gameButton.setAttribute('aria-pressed',muted?'true':'false')}
+    const startText=muted?'🔇 ミュート':'🔊 おとあり';
+    const gameText=muted?'🔇':'🔊';
+    if(startButton){startButton.textContent=startText;startButton.setAttribute('aria-pressed',muted?'true':'false');startButton.setAttribute('aria-label',muted?'音を出す':'ミュートにする')}
+    if(gameButton&&!gameButton.classList.contains('armed')){gameButton.textContent=gameText;gameButton.setAttribute('aria-pressed',muted?'true':'false');gameButton.setAttribute('aria-label',muted?'音を出す':'ミュートにする')}
   }
   updateUI();
 })();
