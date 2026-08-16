@@ -4,7 +4,7 @@
 
   const style=document.createElement('style');
   style.textContent=`
-    .toy.gesture-held{animation:none!important;transition:transform .045s linear,filter .15s ease;filter:drop-shadow(0 14px 12px rgba(0,0,0,.2)) brightness(1.03);z-index:18;will-change:transform;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+    .toy.gesture-held{animation:none!important;transition:transform .045s linear;filter:none!important;z-index:18}
     .trail-speck,.trail-rail,.trail-bubble{position:absolute;pointer-events:none;z-index:8;transform:translate(-50%,-50%);animation:trailFade .95s ease-out forwards}
     .trail-speck{font-size:18px;filter:drop-shadow(0 0 6px rgba(255,255,255,.75))}
     .trail-bubble{font-size:17px}
@@ -93,7 +93,6 @@
       if(!toyGesture||toyGesture.toy!==toy)return;
       toyGesture.long=true;
       toy.style.setProperty('transform',`translate3d(${toyGesture.dx}px,${toyGesture.dy}px,0) scale(1.26)`,'important');
-      toy.animate([{filter:'brightness(1)'},{filter:'brightness(1.16)'},{filter:'brightness(1)'}],{duration:420});
     },360);
   }
   function moveToy(e){
@@ -118,9 +117,12 @@
     toyGesture=null;
     setTimeout(()=>{
       if(!toy.isConnected)return;
-      toy.classList.remove('gesture-held');toy.style.transition='';toy.style.removeProperty('transform');toy.style.removeProperty('will-change');
+      toy.classList.remove('gesture-held');toy.style.transition='';toy.style.removeProperty('transform');
     },220);
     if(!fire||!toy.isConnected)return;
+    // Explicit speech signal makes long drags reliable even when Safari retargets pointerup.
+    try{toy.dispatchEvent(new CustomEvent('kotoba-speak-toy',{bubbles:true}))}catch(err){}
+    // Trigger the original game action once on release.
     try{toy.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,cancelable:true,clientX:e.clientX,clientY:e.clientY,pointerType:e.pointerType||'touch',pointerId:-1}))}catch(err){}
   }
 
