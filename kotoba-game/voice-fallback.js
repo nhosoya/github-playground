@@ -1,12 +1,14 @@
 (()=>{
   if (!('speechSynthesis' in window) || !('indexedDB' in window)) return;
 
-  const wordToKey = new Map([
-    ['わんわん','wanwan'],['にゃー','nyaa'],['ぴよぴよ','piyopiyo'],['けろけろ','kerokero'],
-    ['がおー','gaoo'],['うさぎ','usagi'],['くじら','kujira'],['ぱんだ','panda'],
-    ['ぶーぶー','buubuu'],['ばす','bus'],['でんしゃ','densha'],['ひこうき','hikouki'],
-    ['きらきら','kirakira'],['ぼーる','ball'],['りんご','ringo'],['ばなな','banana'],
-    ['いちご','ichigo'],['くま','kuma'],['あかちゃん','akachan'],['ぱぱ','papa'],['まま','mama']
+  const emojiToWord = new Map([
+    ['🐶',['わんわん','wanwan']],['🐱',['にゃー','nyaa']],['🐥',['ぴよぴよ','piyopiyo']],
+    ['🐸',['けろけろ','kerokero']],['🦁',['がおー','gaoo']],['🐰',['うさぎ','usagi']],
+    ['🐳',['くじら','kujira']],['🐼',['ぱんだ','panda']],['🚗',['ぶーぶー','buubuu']],
+    ['🚌',['ばす','bus']],['🚃',['でんしゃ','densha']],['✈️',['ひこうき','hikouki']],
+    ['⭐',['きらきら','kirakira']],['⚽️',['ぼーる','ball']],['⚽',['ぼーる','ball']],
+    ['🍎',['りんご','ringo']],['🍌',['ばなな','banana']],['🍓',['いちご','ichigo']],
+    ['🧸',['くま','kuma']],['👶',['あかちゃん','akachan']],['👨',['ぱぱ','papa']],['👩',['まま','mama']]
   ]);
 
   const recorded = new Set();
@@ -14,13 +16,12 @@
 
   function refreshVoice(){
     const voices = speechSynthesis.getVoices();
-    jaVoice = voices.find(v => /^ja(?:-|_)/i.test(v.lang)) ||
-              voices.find(v => v.lang === 'ja-JP') ||
+    jaVoice = voices.find(v => v.lang === 'ja-JP') ||
+              voices.find(v => /^ja(?:-|_)/i.test(v.lang)) ||
               null;
   }
   refreshVoice();
   speechSynthesis.addEventListener?.('voiceschanged', refreshVoice);
-  speechSynthesis.onvoiceschanged = refreshVoice;
 
   function openDB(){
     return new Promise((resolve,reject)=>{
@@ -56,22 +57,24 @@
       const u=new SpeechSynthesisUtterance(text);
       u.lang='ja-JP';
       if(jaVoice) u.voice=jaVoice;
-      u.rate=.72;
-      u.pitch=1.02;
+      u.rate=.76;
+      u.pitch=1.08;
       u.volume=1;
       speechSynthesis.speak(u);
     }catch(e){}
   }
 
+  // Capture phase is intentional: on iOS, start SpeechSynthesis directly from the
+  // user's gesture before the game's WebAudio/tap handler runs.
   document.addEventListener('pointerdown',e=>{
     const toy=e.target.closest?.('.toy');
     if(!toy) return;
 
-    // The game's own handler updates #word synchronously before this bubbles to document.
-    const text=document.getElementById('word')?.textContent?.trim();
-    const key=wordToKey.get(text);
-    if(!text || !key || recorded.has(key)) return;
+    const pair=emojiToWord.get(toy.textContent.trim());
+    if(!pair) return;
+    const [text,key]=pair;
+    if(recorded.has(key)) return;
 
     speak(text);
-  });
+  },{capture:true,passive:true});
 })();
