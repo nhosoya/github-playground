@@ -1,6 +1,7 @@
 (()=>{
   if (!('speechSynthesis' in window) || !('indexedDB' in window)) return;
 
+  const VOICE_KEY='kotoba-tts-voice-uri';
   const emojiToWord = new Map([
     ['🐶',['わんわん','wanwan']],['🐱',['にゃー','nyaa']],['🐥',['ぴよぴよ','piyopiyo']],
     ['🐸',['けろけろ','kerokero']],['🦁',['がおー','gaoo']],['🐰',['うさぎ','usagi']],
@@ -13,15 +14,22 @@
 
   const recorded = new Set();
   let jaVoice = null;
+  let japaneseVoices=[];
 
   function refreshVoice(){
     const voices = speechSynthesis.getVoices();
-    jaVoice = voices.find(v => v.lang === 'ja-JP') ||
-              voices.find(v => /^ja(?:-|_)/i.test(v.lang)) ||
-              null;
+    japaneseVoices=voices.filter(v=>/^ja(?:-|_)/i.test(v.lang));
+    const saved=localStorage.getItem(VOICE_KEY);
+    jaVoice=(saved && japaneseVoices.find(v=>v.voiceURI===saved || v.name===saved)) ||
+      japaneseVoices.find(v=>v.lang==='ja-JP' && v.localService) ||
+      japaneseVoices.find(v=>v.lang==='ja-JP') ||
+      japaneseVoices.find(v=>v.localService) ||
+      japaneseVoices[0] || null;
   }
   refreshVoice();
   speechSynthesis.addEventListener?.('voiceschanged', refreshVoice);
+  window.addEventListener('storage',refreshVoice);
+  window.addEventListener('pageshow',refreshVoice);
 
   function openDB(){
     return new Promise((resolve,reject)=>{
@@ -48,24 +56,23 @@
     }catch(e){}
   }
   refreshRecorded();
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden) refreshRecorded()});
-  window.addEventListener('pageshow',refreshRecorded);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden){refreshRecorded();refreshVoice()}});
 
   function speak(text){
     try{
+      refreshVoice();
       speechSynthesis.cancel();
       const u=new SpeechSynthesisUtterance(text);
       u.lang='ja-JP';
       if(jaVoice) u.voice=jaVoice;
-      u.rate=.76;
-      u.pitch=1.08;
+      // Less exaggerated than the previous fallback; closer to ordinary speech.
+      u.rate=.88;
+      u.pitch=1.0;
       u.volume=1;
       speechSynthesis.speak(u);
     }catch(e){}
   }
 
-  // Capture phase is intentional: on iOS, start SpeechSynthesis directly from the
-  // user's gesture before the game's WebAudio/tap handler runs.
   document.addEventListener('pointerdown',e=>{
     const toy=e.target.closest?.('.toy');
     if(!toy) return;
