@@ -1,5 +1,5 @@
 (()=>{
-  const APP_VERSION = '2026.08.16.12';
+  const APP_VERSION = '2026.08.16.13';
   const start = document.getElementById('start');
   if (!start || document.getElementById('appVersion')) return;
 
