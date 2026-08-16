@@ -20,7 +20,12 @@
   }
   function applyToy(toy){
     if(!toy||!toy.classList?.contains('toy'))return;
-    const emoji=toy.textContent.trim(),key=EMOJI_TO_KEY.get(emoji),url=key&&photoUrls.get(key);
+    // Custom cards already own their background image. Do not touch them here.
+    if(toy.classList.contains('custom-photo') || String(toy.dataset.voiceKey||'').startsWith('custom:')) return;
+    const emoji=toy.textContent.trim(),key=EMOJI_TO_KEY.get(emoji);
+    // This helper only manages the four built-in photo-enabled cards.
+    if(!key) return;
+    const url=photoUrls.get(key);
     if(url){toy.classList.add('has-photo');toy.style.backgroundImage=`url("${url}")`}
     else{toy.classList.remove('has-photo');toy.style.backgroundImage=''}
   }
