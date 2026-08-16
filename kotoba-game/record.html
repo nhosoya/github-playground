@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#fff7e8">
+<title>ことばの こえを ろくおん</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}body{margin:0;font-family:system-ui,-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif;background:linear-gradient(180deg,#dff6ff,#fff7e8);color:#263238;padding:20px 16px 40px}h1{font-size:28px;margin:8px 0 6px}.lead{margin:0 0 18px;line-height:1.6;color:#52656d}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.card{background:#ffffffd9;border-radius:24px;padding:16px;box-shadow:0 7px 20px #0001;text-align:center}.emoji{font-size:54px;line-height:1}.word{font-size:24px;font-weight:900;margin:6px 0 12px}.buttons{display:flex;gap:8px;justify-content:center}.buttons button{border:0;border-radius:999px;padding:10px 13px;font-size:15px;font-weight:900;background:#eef3f5;color:#263238}.buttons .record{background:#ffd6dd}.buttons .play{background:#dff6ff}.saved{font-size:12px;font-weight:800;margin-top:9px;color:#77888f;min-height:1.4em}.saved.ok{color:#347a51}.recording .record{background:#ff7188;color:#fff;animation:pulse .8s infinite alternate}.top{display:flex;gap:8px;position:sticky;top:0;z-index:10;padding:8px 0 12px;background:linear-gradient(180deg,#dff6ff 80%,transparent)}.top a,.top button{flex:1;text-align:center;text-decoration:none;border:0;border-radius:999px;padding:12px;font-weight:900;background:#fff;color:#344;box-shadow:0 4px 12px #0001}.note{font-size:13px;line-height:1.5;margin:18px 4px;color:#667}@keyframes pulse{from{transform:scale(.98)}to{transform:scale(1.04)}}@media(min-width:700px){.grid{grid-template-columns:repeat(3,minmax(0,1fr));max-width:850px;margin:auto}.top,h1,.lead,.note{max-width:850px;margin-left:auto;margin-right:auto}}
+</style>
+</head>
+<body>
+<div class="top"><a href="./">▶ ゲームへ</a><button id="clear">録音を全部消す</button></div>
+<h1>ことばの こえを ろくおん</h1>
+<p class="lead">赤いボタンを押して単語を言い、もう一度押して停止します。録音はこの端末のSafari内に保存され、ゲームでそのまま使われます。</p>
+<div id="grid" class="grid"></div>
+<p class="note">録音データはGitHubには送信されません。このSafariのブラウザ保存領域（IndexedDB）だけに保存します。サイトデータを消すと録音も消えます。</p>
+<script>
+const words=[
+['🐶','わんわん','wanwan'],['🐱','にゃー','nyaa'],['🐥','ぴよぴよ','piyopiyo'],['🐸','けろけろ','kerokero'],['🦁','がおー','gaoo'],['🐰','うさぎ','usagi'],['🐳','くじら','kujira'],['🐼','ぱんだ','panda'],['🚗','ぶーぶー','buubuu'],['🚌','ばす','bus'],['🚃','でんしゃ','densha'],['✈️','ひこうき','hikouki'],['⭐','きらきら','kirakira'],['⚽️','ぼーる','ball'],['🍎','りんご','ringo'],['🍌','ばなな','banana'],['🍓','いちご','ichigo'],['🧸','くま','kuma'],['👶','あかちゃん','akachan'],['👨','ぱぱ','papa'],['👩','まま','mama']
+];
+let active=null;
+function openDB(){return new Promise((resolve,reject)=>{const r=indexedDB.open('kotoba-voice-db',1);r.onupgradeneeded=()=>{const db=r.result;if(!db.objectStoreNames.contains('voices'))db.createObjectStore('voices')};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})}
+async function putVoice(key,blob){const db=await openDB();return new Promise((resolve,reject)=>{const tx=db.transaction('voices','readwrite');tx.objectStore('voices').put(blob,key);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)})}
+async function getVoice(key){const db=await openDB();return new Promise((resolve,reject)=>{const r=db.transaction('voices','readonly').objectStore('voices').get(key);r.onsuccess=()=>resolve(r.result||null);r.onerror=()=>reject(r.error)})}
+async function deleteAll(){const db=await openDB();return new Promise((resolve,reject)=>{const tx=db.transaction('voices','readwrite');tx.objectStore('voices').clear();tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)})}
+const grid=document.getElementById('grid');
+for(const [emoji,label,key] of words){const card=document.createElement('div');card.className='card';card.dataset.key=key;card.innerHTML=`<div class="emoji">${emoji}</div><div class="word">${label}</div><div class="buttons"><button class="record">● ろくおん</button><button class="play">▶ きく</button></div><div class="saved"></div>`;grid.appendChild(card);const rec=card.querySelector('.record'),play=card.querySelector('.play'),status=card.querySelector('.saved');
+async function update(){const b=await getVoice(key);status.textContent=b?'✓ ろくおん済み':'まだ録音なし';status.classList.toggle('ok',!!b);play.disabled=!b}
+rec.addEventListener('click',async()=>{if(active&&active.key!==key){alert('先に今の録音を止めてください');return}if(active&&active.key===key){active.recorder.stop();return}try{const stream=await navigator.mediaDevices.getUserMedia({audio:true});const chunks=[];const mime=MediaRecorder.isTypeSupported('audio/mp4')?'audio/mp4':(MediaRecorder.isTypeSupported('audio/webm')?'audio/webm':'');const mr=mime?new MediaRecorder(stream,{mimeType:mime}):new MediaRecorder(stream);mr.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};mr.onstop=async()=>{stream.getTracks().forEach(t=>t.stop());const blob=new Blob(chunks,{type:mr.mimeType||'audio/webm'});await putVoice(key,blob);active=null;card.classList.remove('recording');rec.textContent='● ろくおん';await update()};mr.start();active={key,recorder:mr};card.classList.add('recording');rec.textContent='■ とめる'}catch(e){alert('マイクを使えませんでした。Safariのマイク許可を確認してください。')}});
+play.addEventListener('click',async()=>{const b=await getVoice(key);if(!b)return;const url=URL.createObjectURL(b);const a=new Audio(url);a.onended=()=>URL.revokeObjectURL(url);await a.play().catch(()=>{});});update()}
+document.getElementById('clear').addEventListener('click',async()=>{if(confirm('この端末に保存した録音を全部消しますか？')){await deleteAll();document.querySelectorAll('.saved').forEach(s=>{s.textContent='まだ録音なし';s.classList.remove('ok')});document.querySelectorAll('.play').forEach(b=>b.disabled=true)}});
+</script>
+</body>
+</html>
