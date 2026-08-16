@@ -1,5 +1,5 @@
-const CACHE = 'kotoba-game-v3';
-const CORE = ['./', './index.html', './record.html', './manifest.webmanifest', './icon.svg', './night.js'];
+const CACHE = 'kotoba-game-v4';
+const CORE = ['./', './index.html', './record.html', './manifest.webmanifest', './icon.svg', './night.js', './version.js'];
 
 self.addEventListener('install', event => {
   event.waitUntil(
@@ -17,9 +17,12 @@ self.addEventListener('activate', event => {
   );
 });
 
-function injectNightScript(html) {
-  if (html.includes('night.js')) return html;
-  return html.replace('</body>', '<script src="./night.js?v=3"></script></body>');
+function injectAppScripts(html) {
+  const scripts = [];
+  if (!html.includes('night.js')) scripts.push('<script src="./night.js?v=4"></script>');
+  if (!html.includes('version.js')) scripts.push('<script src="./version.js?v=2026.08.16.1"></script>');
+  if (!scripts.length) return html;
+  return html.replace('</body>', `${scripts.join('')}</body>`);
 }
 
 async function networkFirst(request, { injectGame = false } = {}) {
@@ -32,7 +35,7 @@ async function networkFirst(request, { injectGame = false } = {}) {
 
     if (!injectGame || !response || !response.ok) return response;
     const html = await response.text();
-    return new Response(injectNightScript(html), {
+    return new Response(injectAppScripts(html), {
       status: response.status,
       statusText: response.statusText,
       headers: response.headers
@@ -41,7 +44,7 @@ async function networkFirst(request, { injectGame = false } = {}) {
     const hit = await caches.match(request) || await caches.match('./');
     if (!hit || !injectGame) return hit;
     const html = await hit.text();
-    return new Response(injectNightScript(html), {
+    return new Response(injectAppScripts(html), {
       status: hit.status,
       statusText: hit.statusText,
       headers: hit.headers
@@ -59,6 +62,5 @@ self.addEventListener('fetch', event => {
   const isGameNavigation = request.mode === 'navigate' &&
     (url.pathname.endsWith('/kotoba-game/') || url.pathname.endsWith('/kotoba-game/index.html'));
 
-  // The app is tiny. Prefer freshness while online and keep the cache only as an offline fallback.
   event.respondWith(networkFirst(request, { injectGame: isGameNavigation }));
 });
