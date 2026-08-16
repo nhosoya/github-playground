@@ -6,13 +6,15 @@
 
   const style=document.createElement('style');
   style.textContent=`
-    html,body,#game,.sun,.cloud,.ground,#hint{transition:background .9s ease,background-color .9s ease,color .7s ease,opacity .7s ease,filter .7s ease,box-shadow .7s ease}
+    html,body,#game,.sun,.cloud,.ground,#hint,#word,#recordLink,#sound{transition:background .9s ease,background-color .9s ease,color .7s ease,opacity .7s ease,filter .7s ease,box-shadow .7s ease,text-shadow .7s ease}
     .sun{z-index:12;display:grid;place-items:center;cursor:pointer;touch-action:manipulation}
     body.night-mode,body.night-mode #game{background:linear-gradient(180deg,#111b46 0%,#26386d 58%,#536c77 100%)}
     body.night-mode .sun{background:transparent!important;box-shadow:none!important;font-size:min(17vw,122px);filter:drop-shadow(0 0 14px rgba(255,244,188,.38))}
     body.night-mode .cloud{opacity:.28;filter:brightness(.75) drop-shadow(0 6px 8px rgba(0,0,0,.16))}
     body.night-mode .ground{background:#557a62;box-shadow:inset 0 18px 0 rgba(255,255,255,.05)}
-    body.night-mode #hint{color:#f5f1dc;text-shadow:0 2px 8px rgba(0,0,0,.45)}
+    body.night-mode #hint{color:#fff8dc;text-shadow:0 2px 8px rgba(0,0,0,.62)}
+    body.night-mode #word{color:#fffdf5;-webkit-text-stroke:2px rgba(22,28,68,.65);text-shadow:0 4px 0 rgba(18,24,63,.72),0 8px 22px rgba(0,0,0,.58),0 0 12px rgba(255,255,255,.28)}
+    body.night-mode #recordLink,body.night-mode #sound{background:rgba(248,248,255,.94);color:#20284d;box-shadow:0 4px 14px rgba(0,0,0,.3)}
     .sky-star{position:absolute;z-index:2;pointer-events:none;opacity:0;transform:scale(.3);animation:starIn .8s ease forwards,twinkle 2.1s ease-in-out .8s infinite alternate;filter:drop-shadow(0 0 6px rgba(255,255,255,.55))}
     .sky-star.out{animation:starOut .45s ease forwards!important}
     .cloud-spark{position:absolute;z-index:15;pointer-events:none;font-size:24px;animation:cloudSpark .8s ease-out forwards}
