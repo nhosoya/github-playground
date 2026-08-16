@@ -1,5 +1,5 @@
-const CACHE = 'kotoba-game-v7';
-const CORE = ['./', './index.html', './record.html', './manifest.webmanifest', './icon.svg', './night.js', './version.js', './voice-fallback.js', './ui-controls.js'];
+const CACHE = 'kotoba-game-v8';
+const CORE = ['./', './index.html', './record.html', './manifest.webmanifest', './icon.svg', './night.js', './version.js', './voice-fallback.js', './ui-controls.js', './voice-settings.js'];
 
 self.addEventListener('install', event => {
   event.waitUntil(
@@ -17,17 +17,22 @@ self.addEventListener('activate', event => {
   );
 });
 
-function injectAppScripts(html) {
+function injectGameScripts(html) {
   const scripts = [];
-  if (!html.includes('night.js')) scripts.push('<script src="./night.js?v=7"></script>');
-  if (!html.includes('voice-fallback.js')) scripts.push('<script src="./voice-fallback.js?v=2026.08.16.5"></script>');
-  if (!html.includes('ui-controls.js')) scripts.push('<script src="./ui-controls.js?v=2026.08.16.5"></script>');
-  if (!html.includes('version.js')) scripts.push('<script src="./version.js?v=2026.08.16.5"></script>');
+  if (!html.includes('night.js')) scripts.push('<script src="./night.js?v=8"></script>');
+  if (!html.includes('voice-fallback.js')) scripts.push('<script src="./voice-fallback.js?v=2026.08.16.6"></script>');
+  if (!html.includes('ui-controls.js')) scripts.push('<script src="./ui-controls.js?v=2026.08.16.6"></script>');
+  if (!html.includes('version.js')) scripts.push('<script src="./version.js?v=2026.08.16.6"></script>');
   if (!scripts.length) return html;
   return html.replace('</body>', `${scripts.join('')}</body>`);
 }
 
-async function networkFirst(request, { injectGame = false } = {}) {
+function injectRecordScripts(html) {
+  if (html.includes('voice-settings.js')) return html;
+  return html.replace('</body>', '<script src="./voice-settings.js?v=2026.08.16.6"></script></body>');
+}
+
+async function networkFirst(request, { page = '' } = {}) {
   try {
     const response = await fetch(request, { cache: 'no-store' });
     if (response && response.ok) {
@@ -35,18 +40,22 @@ async function networkFirst(request, { injectGame = false } = {}) {
       caches.open(CACHE).then(cache => cache.put(request, copy));
     }
 
-    if (!injectGame || !response || !response.ok) return response;
-    const html = await response.text();
-    return new Response(injectAppScripts(html), {
+    if (!page || !response || !response.ok) return response;
+    let html = await response.text();
+    if (page === 'game') html = injectGameScripts(html);
+    if (page === 'record') html = injectRecordScripts(html);
+    return new Response(html, {
       status: response.status,
       statusText: response.statusText,
       headers: response.headers
     });
   } catch (error) {
     const hit = await caches.match(request) || await caches.match('./');
-    if (!hit || !injectGame) return hit;
-    const html = await hit.text();
-    return new Response(injectAppScripts(html), {
+    if (!hit || !page) return hit;
+    let html = await hit.text();
+    if (page === 'game') html = injectGameScripts(html);
+    if (page === 'record') html = injectRecordScripts(html);
+    return new Response(html, {
       status: hit.status,
       statusText: hit.statusText,
       headers: hit.headers
@@ -61,8 +70,11 @@ self.addEventListener('fetch', event => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
-  const isGameNavigation = request.mode === 'navigate' &&
-    (url.pathname.endsWith('/kotoba-game/') || url.pathname.endsWith('/kotoba-game/index.html'));
+  let page='';
+  if(request.mode === 'navigate'){
+    if(url.pathname.endsWith('/kotoba-game/') || url.pathname.endsWith('/kotoba-game/index.html')) page='game';
+    else if(url.pathname.endsWith('/kotoba-game/record.html')) page='record';
+  }
 
-  event.respondWith(networkFirst(request, { injectGame: isGameNavigation }));
+  event.respondWith(networkFirst(request, { page }));
 });
