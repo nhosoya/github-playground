@@ -1,4 +1,4 @@
-const CACHE = 'kotoba-game-v4';
+const CACHE = 'kotoba-game-v5';
 const CORE = ['./', './index.html', './record.html', './manifest.webmanifest', './icon.svg', './night.js', './version.js'];
 
 self.addEventListener('install', event => {
@@ -19,8 +19,8 @@ self.addEventListener('activate', event => {
 
 function injectAppScripts(html) {
   const scripts = [];
-  if (!html.includes('night.js')) scripts.push('<script src="./night.js?v=4"></script>');
-  if (!html.includes('version.js')) scripts.push('<script src="./version.js?v=2026.08.16.1"></script>');
+  if (!html.includes('night.js')) scripts.push('<script src="./night.js?v=5"></script>');
+  if (!html.includes('version.js')) scripts.push('<script src="./version.js?v=2026.08.16.2"></script>');
   if (!scripts.length) return html;
   return html.replace('</body>', `${scripts.join('')}</body>`);
 }
