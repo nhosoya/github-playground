@@ -4,7 +4,7 @@
 
   const style=document.createElement('style');
   style.textContent=`
-    .toy.gesture-held{animation:none!important;transition:transform .08s linear,left .03s linear,top .03s linear,filter .15s ease;filter:drop-shadow(0 14px 12px rgba(0,0,0,.2)) brightness(1.03);z-index:18}
+    .toy.gesture-held{animation:none!important;transition:transform .045s linear,filter .15s ease;filter:drop-shadow(0 14px 12px rgba(0,0,0,.2)) brightness(1.03);z-index:18;will-change:transform;backface-visibility:hidden;-webkit-backface-visibility:hidden}
     .trail-speck,.trail-rail,.trail-bubble{position:absolute;pointer-events:none;z-index:8;transform:translate(-50%,-50%);animation:trailFade .95s ease-out forwards}
     .trail-speck{font-size:18px;filter:drop-shadow(0 0 6px rgba(255,255,255,.75))}
     .trail-bubble{font-size:17px}
@@ -84,51 +84,41 @@
   function startToy(e,toy){
     e.preventDefault();e.stopImmediatePropagation();
     const rect=toy.getBoundingClientRect();
-    const startLeft=parseFloat(toy.style.left)||rect.left;
-    const startTop=parseFloat(toy.style.top)||rect.top;
-    toyGesture={id:e.pointerId,toy,startX:e.clientX,startY:e.clientY,startLeft,startTop,dx:0,dy:0,long:false};
+    toyGesture={id:e.pointerId,toy,startX:e.clientX,startY:e.clientY,startRect:rect,dx:0,dy:0,long:false};
     toy.classList.add('gesture-held');
-    toy.style.setProperty('transform','scale(1.12)','important');
+    toy.style.setProperty('transform','translate3d(0,0,0) scale(1.12)','important');
     try{toy.setPointerCapture(e.pointerId)}catch(err){}
     clearTimeout(holdTimer);
     holdTimer=setTimeout(()=>{
       if(!toyGesture||toyGesture.toy!==toy)return;
       toyGesture.long=true;
-      toy.style.setProperty('transform','scale(1.26)','important');
+      toy.style.setProperty('transform',`translate3d(${toyGesture.dx}px,${toyGesture.dy}px,0) scale(1.26)`,'important');
       toy.animate([{filter:'brightness(1)'},{filter:'brightness(1.16)'},{filter:'brightness(1)'}],{duration:420});
     },360);
   }
   function moveToy(e){
     if(!toyGesture||e.pointerId!==toyGesture.id)return;
     e.preventDefault();
-    const toy=toyGesture.toy;
-    const rect=toy.getBoundingClientRect();
-    const maxX=Math.max(0,innerWidth-rect.width);
-    const minY=Math.max(0,envSafeTop());
-    const maxY=Math.max(minY,innerHeight-rect.height);
-    const wantedLeft=toyGesture.startLeft+(e.clientX-toyGesture.startX);
-    const wantedTop=toyGesture.startTop+(e.clientY-toyGesture.startY);
-    const left=Math.max(0,Math.min(maxX,wantedLeft));
-    const top=Math.max(minY,Math.min(maxY,wantedTop));
-    toyGesture.dx=left-toyGesture.startLeft;toyGesture.dy=top-toyGesture.startTop;
-    toy.style.left=left+'px';toy.style.top=top+'px';
-    const distance=Math.hypot(toyGesture.dx,toyGesture.dy),scale=toyGesture.long?1.26:1.12+Math.min(.12,distance/500);
-    toy.style.setProperty('transform',`scale(${scale})`,'important');
-  }
-  function envSafeTop(){
-    const v=getComputedStyle(document.documentElement).getPropertyValue('--safe-top');
-    return parseFloat(v)||0;
+    const {toy,startRect}=toyGesture;
+    let dx=e.clientX-toyGesture.startX,dy=e.clientY-toyGesture.startY;
+    const minDx=-startRect.left,maxDx=innerWidth-startRect.right;
+    const minDy=-startRect.top,maxDy=innerHeight-startRect.bottom;
+    dx=Math.max(minDx,Math.min(maxDx,dx));
+    dy=Math.max(minDy,Math.min(maxDy,dy));
+    toyGesture.dx=dx;toyGesture.dy=dy;
+    const distance=Math.hypot(dx,dy),scale=toyGesture.long?1.26:1.12+Math.min(.12,distance/500);
+    toy.style.setProperty('transform',`translate3d(${dx}px,${dy}px,0) scale(${scale})`,'important');
   }
   function finishToy(e,fire=true){
     if(!toyGesture||e.pointerId!==toyGesture.id)return;
-    const {toy,startLeft,startTop}=toyGesture;clearTimeout(holdTimer);holdTimer=null;
+    const {toy}=toyGesture;clearTimeout(holdTimer);holdTimer=null;
     try{toy.releasePointerCapture(e.pointerId)}catch(err){}
-    toy.style.transition='left .22s cubic-bezier(.2,.8,.2,1.2),top .22s cubic-bezier(.2,.8,.2,1.2),transform .22s cubic-bezier(.2,.8,.2,1.2)';
-    toy.style.left=startLeft+'px';toy.style.top=startTop+'px';toy.style.setProperty('transform','scale(1)','important');
+    toy.style.transition='transform .22s cubic-bezier(.2,.8,.2,1.2)';
+    toy.style.setProperty('transform','translate3d(0,0,0) scale(1)','important');
     toyGesture=null;
     setTimeout(()=>{
       if(!toy.isConnected)return;
-      toy.classList.remove('gesture-held');toy.style.transition='';toy.style.removeProperty('transform');
+      toy.classList.remove('gesture-held');toy.style.transition='';toy.style.removeProperty('transform');toy.style.removeProperty('will-change');
     },220);
     if(!fire||!toy.isConnected)return;
     try{toy.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,cancelable:true,clientX:e.clientX,clientY:e.clientY,pointerType:e.pointerType||'touch',pointerId:-1}))}catch(err){}
