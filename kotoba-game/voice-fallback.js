@@ -29,7 +29,7 @@
   refreshVoice();
   speechSynthesis.addEventListener?.('voiceschanged', refreshVoice);
   window.addEventListener('storage',refreshVoice);
-  window.addEventListener('pageshow',refreshVoice);
+  window.addEventListener('pageshow',()=>{refreshVoice();refreshRecorded()});
 
   function openDB(){
     return new Promise((resolve,reject)=>{
@@ -65,7 +65,6 @@
       const u=new SpeechSynthesisUtterance(text);
       u.lang='ja-JP';
       if(jaVoice) u.voice=jaVoice;
-      // Less exaggerated than the previous fallback; closer to ordinary speech.
       u.rate=.88;
       u.pitch=1.0;
       u.volume=1;
@@ -73,7 +72,10 @@
     }catch(e){}
   }
 
-  document.addEventListener('pointerdown',e=>{
+  // The recorder preview works from a completed tap/click on iOS. Do the same
+  // here: let the game's pointerdown animation/chime run first, then speak on
+  // pointerup while we are still directly inside the user's gesture.
+  document.addEventListener('pointerup',e=>{
     const toy=e.target.closest?.('.toy');
     if(!toy) return;
 
