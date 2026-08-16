@@ -1,4 +1,4 @@
-const CACHE = 'kotoba-game-v14';
+const CACHE = 'kotoba-game-v15';
 const CORE = ['./', './index.html', './record.html', './manifest.webmanifest', './icon.svg', './mute.js', './night.js', './version.js', './voice-fallback.js', './ui-controls.js', './voice-settings.js', './photo-settings.js', './photo-display.js', './custom-settings.js', './custom-preview.js'];
 
 self.addEventListener('install', event => {
@@ -19,22 +19,22 @@ self.addEventListener('activate', event => {
 
 function injectGameScripts(html) {
   const scripts = [];
-  if (!html.includes('mute.js')) scripts.push('<script src="./mute.js?v=2026.08.16.12"></script>');
-  if (!html.includes('night.js')) scripts.push('<script src="./night.js?v=14"></script>');
-  if (!html.includes('voice-fallback.js')) scripts.push('<script src="./voice-fallback.js?v=2026.08.16.12"></script>');
-  if (!html.includes('photo-display.js')) scripts.push('<script src="./photo-display.js?v=2026.08.16.12"></script>');
-  if (!html.includes('ui-controls.js')) scripts.push('<script src="./ui-controls.js?v=2026.08.16.12"></script>');
-  if (!html.includes('version.js')) scripts.push('<script src="./version.js?v=2026.08.16.12"></script>');
+  if (!html.includes('mute.js')) scripts.push('<script src="./mute.js?v=2026.08.16.13"></script>');
+  if (!html.includes('night.js')) scripts.push('<script src="./night.js?v=15"></script>');
+  if (!html.includes('voice-fallback.js')) scripts.push('<script src="./voice-fallback.js?v=2026.08.16.13"></script>');
+  if (!html.includes('photo-display.js')) scripts.push('<script src="./photo-display.js?v=2026.08.16.13"></script>');
+  if (!html.includes('ui-controls.js')) scripts.push('<script src="./ui-controls.js?v=2026.08.16.13"></script>');
+  if (!html.includes('version.js')) scripts.push('<script src="./version.js?v=2026.08.16.13"></script>');
   if (!scripts.length) return html;
   return html.replace('</body>', `${scripts.join('')}</body>`);
 }
 
 function injectRecordScripts(html) {
   const scripts=[];
-  if(!html.includes('voice-settings.js')) scripts.push('<script src="./voice-settings.js?v=2026.08.16.12"></script>');
-  if(!html.includes('photo-settings.js')) scripts.push('<script src="./photo-settings.js?v=2026.08.16.12"></script>');
-  if(!html.includes('custom-settings.js')) scripts.push('<script src="./custom-settings.js?v=2026.08.16.12"></script>');
-  if(!html.includes('custom-preview.js')) scripts.push('<script src="./custom-preview.js?v=2026.08.16.12"></script>');
+  if(!html.includes('voice-settings.js')) scripts.push('<script src="./voice-settings.js?v=2026.08.16.13"></script>');
+  if(!html.includes('photo-settings.js')) scripts.push('<script src="./photo-settings.js?v=2026.08.16.13"></script>');
+  if(!html.includes('custom-settings.js')) scripts.push('<script src="./custom-settings.js?v=2026.08.16.13"></script>');
+  if(!html.includes('custom-preview.js')) scripts.push('<script src="./custom-preview.js?v=2026.08.16.13"></script>');
   if(!scripts.length) return html;
   return html.replace('</body>', `${scripts.join('')}</body>`);
 }
