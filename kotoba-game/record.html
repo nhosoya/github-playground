@@ -2,11 +2,21 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#fff7e8">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ことばあそび">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icon.svg" type="image/svg+xml">
 <title>ことばの こえを ろくおん</title>
 <style>
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}body{margin:0;font-family:system-ui,-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif;background:linear-gradient(180deg,#dff6ff,#fff7e8);color:#263238;padding:20px 16px 40px}h1{font-size:28px;margin:8px 0 6px}.lead{margin:0 0 18px;line-height:1.6;color:#52656d}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.card{background:#ffffffd9;border-radius:24px;padding:16px;box-shadow:0 7px 20px #0001;text-align:center}.emoji{font-size:54px;line-height:1}.word{font-size:24px;font-weight:900;margin:6px 0 12px}.buttons{display:flex;gap:8px;justify-content:center}.buttons button{border:0;border-radius:999px;padding:10px 13px;font-size:15px;font-weight:900;background:#eef3f5;color:#263238}.buttons .record{background:#ffd6dd}.buttons .play{background:#dff6ff}.saved{font-size:12px;font-weight:800;margin-top:9px;color:#77888f;min-height:1.4em}.saved.ok{color:#347a51}.recording .record{background:#ff7188;color:#fff;animation:pulse .8s infinite alternate}.top{display:flex;gap:8px;position:sticky;top:0;z-index:10;padding:8px 0 12px;background:linear-gradient(180deg,#dff6ff 80%,transparent)}.top a,.top button{flex:1;text-align:center;text-decoration:none;border:0;border-radius:999px;padding:12px;font-weight:900;background:#fff;color:#344;box-shadow:0 4px 12px #0001}.note{font-size:13px;line-height:1.5;margin:18px 4px;color:#667}@keyframes pulse{from{transform:scale(.98)}to{transform:scale(1.04)}}@media(min-width:700px){.grid{grid-template-columns:repeat(3,minmax(0,1fr));max-width:850px;margin:auto}.top,h1,.lead,.note{max-width:850px;margin-left:auto;margin-right:auto}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+html,body{margin:0;min-height:100%;overscroll-behavior:none}
+body{font-family:system-ui,-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif;background:linear-gradient(180deg,#dff6ff,#fff7e8);color:#263238;padding:20px 16px max(40px,env(safe-area-inset-bottom));touch-action:pan-y}
+button,a{font:inherit;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:manipulation}
+h1{font-size:28px;margin:8px 0 6px}.lead{margin:0 0 18px;line-height:1.6;color:#52656d}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.card{background:#ffffffd9;border-radius:24px;padding:16px;box-shadow:0 7px 20px #0001;text-align:center}.emoji{font-size:54px;line-height:1}.word{font-size:24px;font-weight:900;margin:6px 0 12px}.buttons{display:flex;gap:8px;justify-content:center}.buttons button{border:0;border-radius:999px;padding:10px 13px;font-size:15px;font-weight:900;background:#eef3f5;color:#263238}.buttons .record{background:#ffd6dd}.buttons .play{background:#dff6ff}.saved{font-size:12px;font-weight:800;margin-top:9px;color:#77888f;min-height:1.4em}.saved.ok{color:#347a51}.recording .record{background:#ff7188;color:#fff;animation:pulse .8s infinite alternate}.top{display:flex;gap:8px;position:sticky;top:0;z-index:10;padding:max(8px,env(safe-area-inset-top)) 0 12px;background:linear-gradient(180deg,#dff6ff 80%,transparent)}.top a,.top button{flex:1;text-align:center;text-decoration:none;border:0;border-radius:999px;padding:12px;font-weight:900;background:#fff;color:#344;box-shadow:0 4px 12px #0001}.note{font-size:13px;line-height:1.5;margin:18px 4px;color:#667}@keyframes pulse{from{transform:scale(.98)}to{transform:scale(1.04)}}@media(min-width:700px){.grid{grid-template-columns:repeat(3,minmax(0,1fr));max-width:850px;margin:auto}.top,h1,.lead,.note{max-width:850px;margin-left:auto;margin-right:auto}}
 </style>
 </head>
 <body>
@@ -16,6 +26,11 @@
 <div id="grid" class="grid"></div>
 <p class="note">録音データはGitHubには送信されません。このSafariのブラウザ保存領域（IndexedDB）だけに保存します。サイトデータを消すと録音も消えます。</p>
 <script>
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}))}
+const block=e=>e.preventDefault();
+['gesturestart','gesturechange','gestureend','selectstart','contextmenu','dragstart','dblclick'].forEach(type=>document.addEventListener(type,block,{passive:false}));
+document.addEventListener('touchmove',e=>{if(e.touches&&e.touches.length>1)e.preventDefault()},{passive:false});
+
 const words=[
 ['🐶','わんわん','wanwan'],['🐱','にゃー','nyaa'],['🐥','ぴよぴよ','piyopiyo'],['🐸','けろけろ','kerokero'],['🦁','がおー','gaoo'],['🐰','うさぎ','usagi'],['🐳','くじら','kujira'],['🐼','ぱんだ','panda'],['🚗','ぶーぶー','buubuu'],['🚌','ばす','bus'],['🚃','でんしゃ','densha'],['✈️','ひこうき','hikouki'],['⭐','きらきら','kirakira'],['⚽️','ぼーる','ball'],['🍎','りんご','ringo'],['🍌','ばなな','banana'],['🍓','いちご','ichigo'],['🧸','くま','kuma'],['👶','あかちゃん','akachan'],['👨','ぱぱ','papa'],['👩','まま','mama']
 ];
