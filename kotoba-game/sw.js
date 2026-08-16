@@ -1,4 +1,4 @@
-const CACHE = 'kotoba-game-v8';
+const CACHE = 'kotoba-game-v9';
 const CORE = ['./', './index.html', './record.html', './manifest.webmanifest', './icon.svg', './night.js', './version.js', './voice-fallback.js', './ui-controls.js', './voice-settings.js'];
 
 self.addEventListener('install', event => {
@@ -19,17 +19,17 @@ self.addEventListener('activate', event => {
 
 function injectGameScripts(html) {
   const scripts = [];
-  if (!html.includes('night.js')) scripts.push('<script src="./night.js?v=8"></script>');
-  if (!html.includes('voice-fallback.js')) scripts.push('<script src="./voice-fallback.js?v=2026.08.16.6"></script>');
-  if (!html.includes('ui-controls.js')) scripts.push('<script src="./ui-controls.js?v=2026.08.16.6"></script>');
-  if (!html.includes('version.js')) scripts.push('<script src="./version.js?v=2026.08.16.6"></script>');
+  if (!html.includes('night.js')) scripts.push('<script src="./night.js?v=9"></script>');
+  if (!html.includes('voice-fallback.js')) scripts.push('<script src="./voice-fallback.js?v=2026.08.16.7"></script>');
+  if (!html.includes('ui-controls.js')) scripts.push('<script src="./ui-controls.js?v=2026.08.16.7"></script>');
+  if (!html.includes('version.js')) scripts.push('<script src="./version.js?v=2026.08.16.7"></script>');
   if (!scripts.length) return html;
   return html.replace('</body>', `${scripts.join('')}</body>`);
 }
 
 function injectRecordScripts(html) {
   if (html.includes('voice-settings.js')) return html;
-  return html.replace('</body>', '<script src="./voice-settings.js?v=2026.08.16.6"></script></body>');
+  return html.replace('</body>', '<script src="./voice-settings.js?v=2026.08.16.7"></script></body>');
 }
 
 async function networkFirst(request, { page = '' } = {}) {
