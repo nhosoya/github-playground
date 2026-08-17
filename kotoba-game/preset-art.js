@@ -8,15 +8,31 @@
     ['densha','https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhgnfvWgrhDORFarJDU2rarAXp80P6ibP09_45IC4rL0zMTGLtEt-vyuu8lGsofmVamgHNw6MRs0IjSYpbRC8f0nxiwutvWbty8zGJDdQfqExQK28j2QpKp7oDIExlzUp1ycEa5MWyLRpo/s450/norimono_character5_densya.png']
   ]);
 
+  // Start all six downloads as soon as this script loads. On the game screen this
+  // happens while the start screen is still visible, so the first toy usually has
+  // its image in the browser cache already.
+  for(const url of ART.values()){
+    const img=new Image();
+    img.decoding='async';
+    img.src=url;
+  }
+
+  const preconnect=document.createElement('link');
+  preconnect.rel='preconnect';
+  preconnect.href='https://blogger.googleusercontent.com';
+  preconnect.crossOrigin='anonymous';
+  document.head.appendChild(preconnect);
+
   const style=document.createElement('style');
   style.textContent=`
     .toy.preset-art{font-size:0!important;background-color:#fffdf8!important;background-position:center!important;background-repeat:no-repeat!important;background-size:82% auto!important}
     .toy.preset-art::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 4px rgba(255,255,255,.62);pointer-events:none}
     .toy.preset-art.has-photo{background-size:cover!important}
+    .emoji.preset-art-thumb{width:76px;height:76px;margin:0 auto;background-position:center;background-repeat:no-repeat;background-size:contain;font-size:0!important}
   `;
   document.head.appendChild(style);
 
-  function apply(toy){
+  function applyToy(toy){
     if(!toy?.classList?.contains('toy'))return;
     if(String(toy.dataset.voiceKey||'').startsWith('custom:'))return;
     const url=ART.get(toy.dataset.voiceKey||'');
@@ -25,16 +41,32 @@
     toy.classList.add('preset-art');
     if(!toy.classList.contains('has-photo'))toy.style.backgroundImage=`url("${url}")`;
   }
-  function applyAll(){document.querySelectorAll('.toy').forEach(apply)}
+
+  function applySettingsCard(card){
+    if(!card?.classList?.contains('card'))return;
+    const url=ART.get(card.dataset.key||'');
+    if(!url)return;
+    const emoji=card.querySelector('.emoji');
+    if(!emoji)return;
+    emoji.classList.add('preset-art-thumb');
+    emoji.style.backgroundImage=`url("${url}")`;
+  }
+
+  function applyAll(){
+    document.querySelectorAll('.toy').forEach(applyToy);
+    document.querySelectorAll('.card[data-key]').forEach(applySettingsCard);
+  }
 
   const observer=new MutationObserver(muts=>{
     for(const m of muts)for(const n of m.addedNodes){
       if(n.nodeType!==1)continue;
-      if(n.classList?.contains('toy'))apply(n);
-      n.querySelectorAll?.('.toy').forEach(apply);
+      if(n.classList?.contains('toy'))applyToy(n);
+      if(n.classList?.contains('card'))applySettingsCard(n);
+      n.querySelectorAll?.('.toy').forEach(applyToy);
+      n.querySelectorAll?.('.card[data-key]').forEach(applySettingsCard);
     }
   });
-  observer.observe(document.getElementById('game')||document.body,{childList:true,subtree:true});
+  observer.observe(document.body,{childList:true,subtree:true});
   window.addEventListener('pageshow',applyAll);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)applyAll()});
   applyAll();
