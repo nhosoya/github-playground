@@ -1,5 +1,5 @@
-const CACHE = 'kotoba-game-v20';
-const CORE = ['./', './index.html', './record.html', './manifest.webmanifest', './icon.svg', './mute.js', './night.js', './version.js', './voice-fallback.js', './gesture-play.js', './ui-controls.js', './voice-settings.js', './photo-settings.js', './photo-display.js', './custom-settings.js'];
+const CACHE = 'kotoba-game-v21';
+const CORE = ['./', './index.html', './record.html', './manifest.webmanifest', './icon.svg', './mute.js', './night.js', './version.js', './voice-fallback.js', './gesture-play.js', './ui-controls.js', './voice-settings.js', './photo-settings.js', './photo-display.js', './preset-art.js', './custom-settings.js'];
 
 self.addEventListener('install', event => {
   event.waitUntil(
@@ -19,22 +19,23 @@ self.addEventListener('activate', event => {
 
 function injectGameScripts(html) {
   const scripts = [];
-  if (!html.includes('mute.js')) scripts.push('<script src="./mute.js?v=2026.08.16.18"></script>');
-  if (!html.includes('night.js')) scripts.push('<script src="./night.js?v=20"></script>');
-  if (!html.includes('voice-fallback.js')) scripts.push('<script src="./voice-fallback.js?v=2026.08.16.18"></script>');
-  if (!html.includes('gesture-play.js')) scripts.push('<script src="./gesture-play.js?v=2026.08.16.18"></script>');
-  if (!html.includes('photo-display.js')) scripts.push('<script src="./photo-display.js?v=2026.08.16.18"></script>');
-  if (!html.includes('ui-controls.js')) scripts.push('<script src="./ui-controls.js?v=2026.08.16.18"></script>');
-  if (!html.includes('version.js')) scripts.push('<script src="./version.js?v=2026.08.16.18"></script>');
+  if (!html.includes('mute.js')) scripts.push('<script src="./mute.js?v=2026.08.16.19"></script>');
+  if (!html.includes('night.js')) scripts.push('<script src="./night.js?v=21"></script>');
+  if (!html.includes('voice-fallback.js')) scripts.push('<script src="./voice-fallback.js?v=2026.08.16.19"></script>');
+  if (!html.includes('gesture-play.js')) scripts.push('<script src="./gesture-play.js?v=2026.08.16.19"></script>');
+  if (!html.includes('preset-art.js')) scripts.push('<script src="./preset-art.js?v=2026.08.16.19"></script>');
+  if (!html.includes('photo-display.js')) scripts.push('<script src="./photo-display.js?v=2026.08.16.19"></script>');
+  if (!html.includes('ui-controls.js')) scripts.push('<script src="./ui-controls.js?v=2026.08.16.19"></script>');
+  if (!html.includes('version.js')) scripts.push('<script src="./version.js?v=2026.08.16.19"></script>');
   if (!scripts.length) return html;
   return html.replace('</body>', `${scripts.join('')}</body>`);
 }
 
 function injectRecordScripts(html) {
   const scripts=[];
-  if(!html.includes('voice-settings.js')) scripts.push('<script src="./voice-settings.js?v=2026.08.16.18"></script>');
-  if(!html.includes('photo-settings.js')) scripts.push('<script src="./photo-settings.js?v=2026.08.16.18"></script>');
-  if(!html.includes('custom-settings.js')) scripts.push('<script src="./custom-settings.js?v=2026.08.16.18"></script>');
+  if(!html.includes('voice-settings.js')) scripts.push('<script src="./voice-settings.js?v=2026.08.16.19"></script>');
+  if(!html.includes('photo-settings.js')) scripts.push('<script src="./photo-settings.js?v=2026.08.16.19"></script>');
+  if(!html.includes('custom-settings.js')) scripts.push('<script src="./custom-settings.js?v=2026.08.16.19"></script>');
   if(!scripts.length) return html;
   return html.replace('</body>', `${scripts.join('')}</body>`);
 }
