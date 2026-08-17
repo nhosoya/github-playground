@@ -26,8 +26,14 @@
     // This helper only manages the four built-in photo-enabled cards.
     if(!key) return;
     const url=photoUrls.get(key);
-    if(url){toy.classList.add('has-photo');toy.style.backgroundImage=`url("${url}")`}
-    else{toy.classList.remove('has-photo');toy.style.backgroundImage=''}
+    if(url){
+      toy.classList.add('has-photo');
+      toy.style.backgroundImage=`url("${url}")`;
+    }else{
+      toy.classList.remove('has-photo');
+      const preset=toy.dataset.presetArtUrl||'';
+      toy.style.backgroundImage=preset?`url("${preset}")`:'';
+    }
   }
   function applyAll(){document.querySelectorAll('.toy').forEach(applyToy)}
 
